@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>聊天界面</title>
+        <meta content="width=device-width,user-scalable=no,minimum-scale=1.0,maximum-scale=1.0,initial-scale=1.0" name="viewport">
+        <script type="text/javascript" src="./jquery-1.11.1.js"></script>
+    </head>
+    <style type="text/css">
+* { box-sizing: border-box; margin: 0; padding: 0; }
+img { max-width: 100%; }
+.img { float: left; height: 40px; margin: 15px auto auto; overflow: hidden; text-align: center; width: 40px; }
+.img img { border-radius: 50%; height: 40px; vertical-align: middle; width: 40px; }
+.info { display: inline-block; max-width: 60%; }
+.chatItem_r .infoWrap { text-align: right; }
+.chatItem_l { overflow: hidden; padding: 13px 27px 13px 10px; }
+.chat { background: none repeat scroll 0 0 #ade7ee; line-height: 1.5; word-break: break-all;}
+.box{overflow-y: scroll;height: 100%;}
+.infoBox { background: none repeat scroll 0 0 white; border-radius: 8px; margin-top: 3px; padding: 10px; position: relative; text-align: left; }
+.infoTop { font-size: 12px; overflow: hidden; padding: 0 10px; }
+.name { color: #666; float: left; }
+.time { color: #999; float: right; }
+.chatItem_l .infoBox::before { background: none repeat scroll 0 0 white; content: ""; height: 10px; left: -5px; position: absolute; top: 9px; transform: rotate(45deg); -webkit-transform: rotate(45deg); width: 10px; }
+.infoWrap { padding-left: 60px; }
+.chatItem_r { padding: 13px 10px 13px 27px; }
+.chatItem_r .img { float: right; }
+.chatItem_r .infoWrap { padding-right: 60px; padding-left: 0; }
+.chatItem_r .infoBox::before { right: -5px; background: none repeat scroll 0 0 white; content: ""; height: 10px; position: absolute; top: 9px; transform: rotate(45deg); -webkit-transform: rotate(45deg); width: 10px; }
+.inputBox { height: 40px; line-height: 40px; position: fixed; bottom: 10px; width: 100%; display: flex; }
+input[type="text"] { height: 100%; flex: 1; outline: none; }
+input[type="button"] { width: 80px; margin-left: 5px; cursor: pointer; }
+    </style>
+    <body>
+    <div class="chat">
+        <div class="box">
+        </div>
+    </div>
+    <div class="inputBox">
+        <input type="text" id="text">
+        <input type="button" value="发布" id="send">
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript">
+    var selfTmp=`<div class="chatItem_r">
+                <div class="img"><img src="http://shp.qpic.cn/bizmp/m811bgI6arw7uUicRJJuiaibB9No0f8oOcWqBwseEibvlqIoWGwGzmoStQ/132" alt="" /></div>
+                <div class="infoWrap">
+                    <div class="info">
+                        <div class="infoTop">
+                                <div class="name">贺传华</div>
+                                <div class="time">01-12 12:00</div>
+                        </div>
+                        <div class="infoBox">
+                            <div class="infoMain">{{text}}</div>
+                        </div>
+                    </div>
+                </div>  
+            </div>`
+    var otherTmp=`<div class="chatItem_l">
+                <div class="img"><img src="http://shp.qpic.cn/bizmp/m811bgI6arw7uUicRJJuiaibB9No0f8oOcWqBwseEibvlqIoWGwGzmoStQ/132" alt="" /></div>
+                <div class="infoWrap">
+                    <div class="info">
+                        <div class="infoTop">
+                                <div class="name">其他人</div>
+                                <div class="time">01-12 12:00</div>
+                        </div>
+                        <div class="infoBox">
+                            <div class="infoMain">{{text}}</div>
+                        </div>
+                    </div>
+                </div>  
+            </div>`
+    $('.chat').height($(window).height()-50)
+        var socket = io();
+        var selfId;
+        $('#send').on('click',function(){
+            socket.emit('chat message', $('#text').val());
+            $('#text').val('');
+            return false;
+        });
+        $('#exit').on('click',function(){
+            console.log("点击了退出按钮")
+            socket.emit('disconnect1',"99999");
+        })
+        socket.on('chat message1', function (msg,id) {
+            console.log(selfId,id)
+            if(selfId==id){
+                $('.box').append(selfTmp.replace(/{{text}}/ig,msg));
+            }else{
+                $('.box').append(otherTmp.replace(/{{text}}/ig,msg));
+            }
+        });
+        socket.on('id', function (id) {
+            console.log(id)
+            selfId=id
+        })
+    </script>
+</body>
+</html>
