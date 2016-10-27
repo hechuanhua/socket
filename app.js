@@ -15,19 +15,20 @@ io.on('connection', function(socket){
         nameArray.push(nickName)
         //socket.nickName=nameArray
         userSocket[nickName]=socket
-        io.sockets.emit("loginSuccess",nameArray.length)//向所有人发送在线人数
+        io.sockets.emit("loginSuccess",nameArray,nickName)//向所有人发送在线人数
         socket.broadcast.emit("welcome",nickName)//向其他人发送新人名称
         socket.on('send', function (user) {
             if(userSocket[user.toNickName]){
                 userSocket[user.toNickName].emit("send1",user)
+            }else{
+                socket.broadcast.emit("send1",user)//向其他人广播消息
             }
-            //socket.broadcast.emit("send1",user)//向其他人广播消息
         });
         socket.on('disconnect',function(){
+            console.log(nickName+"退出了聊天室")
             var index=nameArray.indexOf(nickName)
             nameArray.splice(index,1)
-            console.log(nickName+"退出了聊天室")
-            io.sockets.emit("loginOut",nameArray.length,nickName)
+            io.sockets.emit("loginOut",nameArray,nickName,index)
         })
     });
     

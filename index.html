@@ -6,16 +6,18 @@
         <meta content="width=device-width,user-scalable=no,minimum-scale=1.0,maximum-scale=1.0,initial-scale=1.0" name="viewport">
     </head>
     <style type="text/css">
+    a:active{background: red;color:red;}
 * { box-sizing: border-box; margin: 0; padding: 0; }
+a{color: #333;}
 img { max-width: 100%; }
 input{outline: none;}
 .img { float: left; height: 40px; margin: 15px auto auto; overflow: hidden; text-align: center; width: 40px; }
 .img img { border-radius: 50%; height: 40px; vertical-align: middle; width: 40px; }
-.info { display: inline-block; max-width: 60%; }
+.infoWrap .info { display: inline-block; max-width: 60%; }
 .chatItem_r .infoWrap { text-align: right; }
 .chatItem_l { overflow: hidden; padding: 13px 27px 13px 10px; }
 .chat { background: none repeat scroll 0 0 #ade7ee; line-height: 1.5; word-break: break-all;}
-.box{overflow-y: scroll;height: 100%;margin-right: 100px;}
+.chatMain { overflow: hidden; position: absolute; right: 100px;  bottom: 50px; top: 0;left: 0; }
 .infoBox { background: none repeat scroll 0 0 white; border-radius: 8px; margin-top: 3px; padding: 10px; position: relative; text-align: left; }
 .infoTop { font-size: 12px; overflow: hidden; padding: 0 10px; }
 .infoTop .name { color: #666; float: left; }
@@ -30,36 +32,39 @@ input{outline: none;}
 .inputBox input[type="text"] { height: 100%; flex: 1; outline: none; }
 .inputBox input[type="button"] { width: 80px; margin-left: 5px; cursor: pointer; }
 .sideBox { position: absolute; top: 0; background: #fff; border-right: 1px solid #ccc; width: 150px; bottom: 50px;}
-.setName { position: fixed; top: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); color: #fff; }
+.setName { position: fixed; top: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); color: #fff;z-index: 100; }
 .setName p { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;display: flex;align-items:center; }
 .setName input[type="text"] { height: 35px; line-height: 35px; border: 1px solid #ccc;padding: 0 5px;font-size: 14px; }
 .setName input[type="button"] { height: 35px; line-height: 35px; border: 1px solid #ccc;width: 40px;cursor: pointer;margin-left: 20px; }
 .welcome { text-align: center; background: #e2e2e2; }
 .onLine { text-align: center; height: 30px; line-height: 30px; cursor: pointer;}
-.onLineList { position: absolute; right: 0; width: 100px; height: 100%; top: 0; }
-.onLine-item { display: flex; align-items: center; font-size: 15px; cursor: pointer; height: 24px; overflow: hidden;user-select:none; }
+.onLineList { position: absolute; right: 0; width: 100px; height: 100%; top: 0;user-select: none; }
+.onLine-item { display: flex; align-items: center; font-size: 15px; cursor: pointer; height: 24px; overflow: hidden;position: relative;}
+.onLine-item.active{background: #f3edd7; }
 .onLine-item img { width: 20px; height: 20px; border-radius: 50%; margin-right: 5px; }
 .onLine-item .name { overflow: hidden; display: inline-block; text-overflow: ellipsis; white-space: nowrap; }
 .onLine-item:hover{background: #f3edd7}
+.chatObject{text-align: center;color: #666;font-size: 20px;background: #d0d6c9;}
+.chatMainItem { position: absolute;overflow-y: auto;height: 100%;width: 100%;background: #ade7ee; }
+.chatMainItem.active{z-index: 5;}
+#groupChat{z-index: 1;}
+.close { position: absolute; right: 0; top: 0; font-family: "微软雅黑"; font-size: 20px; cursor: pointer; width: 40px; text-align: center; }
+.close:hover{background: #a2dae0;}
+.chatHead { position: fixed; height: 30px; top:0;left: 0; right: 100px; }
+.onLine-item i { font-style: normal; color: #fff; background: red; display: block;  border-radius: 4px; text-align: center; line-height: 10px; font-size: 12px; padding: 0 5px; position: absolute; right: 0; }
     </style>
     <body>
     <div class="chat" id="chatBox">
-        <div class="box" id="box">
-            
-        </div>
         <div class="onLineList">
             <div class="onLine">当前<span id="num">0</span>人在线</div>
-            <div class="onLine-item">
-                <img src="http://shp.qpic.cn/bizmp/m811bgI6arw7uUicRJJuiaibB9No0f8oOcWqBwseEibvlqIoWGwGzmoStQ/132" alt="" />
-                <span class="name">贺传华</span>
-            </div>
-            <div class="onLine-item">
-                <img src="http://shp.qpic.cn/bizmp/m811bgI6arw7uUicRJJuiaibB9No0f8oOcWqBwseEibvlqIoWGwGzmoStQ/132" alt="" />
-                <span class="name">贺传华</span>
-            </div>
-            <div class="onLine-item">
-                <img src="http://shp.qpic.cn/bizmp/m811bgI6arw7uUicRJJuiaibB9No0f8oOcWqBwseEibvlqIoWGwGzmoStQ/132" alt="" />
-                <span class="name">贺传华</span>
+            <div id="onLineList"></div>
+        </div>
+        <div class="chatMain" id="chatMain">
+            <div class="chatMainItem" id="groupChat">
+                <div style="height:30px"></div>
+                <div class="chatHead">
+                    <div class="chatObject">群聊中</div>
+                </div>
             </div>
         </div>
     </div>
@@ -72,6 +77,9 @@ input{outline: none;}
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript">
+
+    </script>
     <script type="text/javascript">
     var selfTmp=`<div class="chatItem_r">
                 <div class="img"><img src="http://shp.qpic.cn/bizmp/m811bgI6arw7uUicRJJuiaibB9No0f8oOcWqBwseEibvlqIoWGwGzmoStQ/132" alt="" /></div>
@@ -101,12 +109,24 @@ input{outline: none;}
                     </div>
                 </div>  
             </div>`
+    var chatObjectTmp=`<div class="chatMainItem active" data-name={{name}}>
+                <div style="height:30px"></div>
+                <div class="chatHead">
+                    <div class="chatObject">与{{name}}聊天中</div>
+                    <div class="close">X</div>
+                </div>
+            </div>`
+    var lineTmp=`<div class="onLine-item" data-name="{{name}}">
+                <img src="http://shp.qpic.cn/bizmp/m811bgI6arw7uUicRJJuiaibB9No0f8oOcWqBwseEibvlqIoWGwGzmoStQ/132" alt="" />
+                <span class="name">{{name}}</span>
+                <i class="infoNum"></i> 
+            </div>`
     var socket = io(),nickName;
     var $=function(element){
         return document.querySelector(element)
     }
     function Chat(){
-        this.box=$('#box')
+        this.box=$('#groupChat')
         this.init()
     }
     Chat.prototype.init=function(){
@@ -126,14 +146,30 @@ input{outline: none;}
             _this.box.scrollTop=99999999
         })
         /*有人登录进来*/
-        socket.on("loginSuccess",function(num){
-            console.log("loginSuccess",num)
-            $('#num').innerHTML=num
+        socket.on("loginSuccess",function(nameArray,name){
+            console.log("loginSuccess",nameArray)
+            var num=nameArray.length,tmp="";
+            
+            $('#num').innerHTML=num;
+            if(nickName==name){
+                [].slice.call($('#onLineList').children).forEach(function(el,i){
+                    el.remove()    
+                })
+                for(var i=0;i<num;i++){
+                    tmp+=lineTmp.replace(/{{name}}/g,nameArray[i])
+                }
+            }else{
+                tmp=lineTmp.replace(/{{name}}/g,name)
+            }
+            $('#onLineList').insertAdjacentHTML("beforeEnd",tmp)
         })
         /*有人退出了*/
-        socket.on('loginOut', function (num,name) {
-            console.log("loginOut",num)
-            $('#num').innerHTML=num
+        socket.on('loginOut', function (nameArray,name,index) {
+            //var index=nameArray.indexOf(name)
+            // nameArray.splice(index,1)
+            console.log("loginOut",nameArray,name)
+            $('#num').innerHTML=nameArray.length
+            $('#onLineList').children[index].remove()
             _this.box.insertAdjacentHTML("beforeEnd",'<div class="welcome">'+name+'已经退出了聊天室</div>')
         })
     }
@@ -147,22 +183,119 @@ input{outline: none;}
         Minutes=date.getMinutes()>=10?date.getMinutes():"0"+date.getMinutes(),
         Seconds=date.getSeconds()>=10?date.getSeconds():"0"+date.getSeconds(),
         time=Month+"-"+Day+" "+Hours+":"+Minutes+":"+Seconds, 
-        value=$('#text').value.trim()
-        user={nickName:nickName,value:value,time:time,toNickName:2222}
-        $('#box').insertAdjacentHTML("beforeEnd",selfTmp.replace(/{{text}}/,$('#text').value).replace(/{{name}}/,nickName).replace(/{{time}}/,time));
+        value=$('#text').value.trim(),
+        toNickName="";
+        var onLineList=document.querySelectorAll('.onLine-item');
+        [].slice.call(onLineList).forEach(function(el,i){
+            if(el.className.indexOf('active')>-1){
+                toNickName=el.getAttribute("data-name")
+                return false
+            }
+
+        })
+        user={nickName:nickName,value:value,time:time,toNickName:toNickName}   
+        var chatList=document.querySelectorAll('.chatMainItem');
+        var on;
+        [].slice.call(chatList).forEach(function(el,i){
+            if(el.className.indexOf('active')){//判断在那个窗口发布内容
+                el.insertAdjacentHTML("beforeEnd",selfTmp.replace(/{{text}}/,$('#text').value).replace(/{{name}}/,nickName).replace(/{{time}}/,time));   
+                el.scrollTop=99999999
+                on=true;
+                return
+            }
+        })
+        if(!on){//如果不存在窗口就代表是群聊窗口
+            $('#groupChat').insertAdjacentHTML("beforeEnd",selfTmp.replace(/{{text}}/,$('#text').value).replace(/{{name}}/,nickName).replace(/{{time}}/,time));   
+        }
         socket.emit('send', user);
-        $('#box').scrollTop=99999999
+        $('#groupChat').scrollTop=99999999
         $('#text').value='';
     });
     /*接受聊天内容*/
+    var chatNum=0
     socket.on('send1', function (user) {
-        console.log(user.toNickName,nickName)
+        console.log(user,nickName)
         if(user.toNickName==nickName){
-            $('#box').insertAdjacentHTML("beforeEnd",otherTmp.replace(/{{text}}/,user.value).replace(/{{name}}/,user.nickName).replace(/{{time}}/,user.time));
-            $('#box').scrollTop=99999999
+            var onLineList=document.querySelectorAll('.onLine-item');
+            [].slice.call(onLineList).forEach(function(el,i){
+                if(el.getAttribute("data-name")==user.nickName){
+                    chatNum++
+                    el.querySelector('.infoNum').innerHTML=chatNum   
+                }
+                el.classList.remove('active')
+            })
+            var on;
+            var chatList=document.querySelectorAll('.chatMainItem');
+            [].slice.call(chatList).forEach(function(el,i){
+                var dataName=el.getAttribute("data-name")
+                if(dataName==user.nickName){//判断是否已存在聊天窗口
+                    on=true
+                    if(el.className.indexOf('active')>-1){//聊天窗口是否已经打开
+                        var onLineList=document.querySelectorAll('.onLine-item');
+                        [].slice.call(onLineList).forEach(function(el,i){
+                            el.classList.remove('active')
+                            if(el.getAttribute("data-name")==dataName){
+                                el.querySelector('.infoNum').innerHTML="" 
+                                el.classList.add('active')  
+                            }
+                        }) 
+                    }
+                    el.insertAdjacentHTML("beforeEnd",otherTmp.replace(/{{text}}/,user.value).replace(/{{name}}/,user.nickName).replace(/{{time}}/,user.time))
+                    el.scrollTop=99999999
+                    return false
+                }
+            })
+            if(!on){//不存在聊天窗口就append窗口，再往窗口里面append聊天记录
+                $('#chatMain').insertAdjacentHTML("beforeEnd",chatObjectTmp.replace(/{{name}}/g,user.nickName).replace(/active/),"");
+                var lastItem=document.querySelectorAll('.chatMainItem')[document.querySelectorAll('.chatMainItem').length-1]
+                lastItem.insertAdjacentHTML("beforeEnd",otherTmp.replace(/{{text}}/,user.value).replace(/{{name}}/,user.nickName).replace(/{{time}}/,user.time))
+                lastItem.scrollTop=99999999   
+            } 
+        }else{
+            $('#groupChat').insertAdjacentHTML("beforeEnd",otherTmp.replace(/{{text}}/,user.value).replace(/{{name}}/,user.nickName).replace(/{{time}}/,user.time));
+            $('#groupChat').scrollTop=99999999
         }
-    })   
-     
+    })
+    /*私聊*/   
+    $('#onLineList').addEventListener('dblclick',function(event){
+        var target;
+        if(event.target.parentNode.className.indexOf('onLine-item')>-1){
+            target=event.target.parentNode
+        }else if(event.target.className.indexOf('onLine-item')>-1){
+            target=event.target
+        }
+        if(target){
+            target.querySelector('.infoNum').innerHTML=""
+            var onLineList=document.querySelectorAll('.onLine-item');
+            [].slice.call(onLineList).forEach(function(el,i){
+                el.classList.remove('active')
+            })
+            target.classList.add('active')
+            var on;
+            var name=target.getAttribute("data-name")
+            var chatList=document.querySelectorAll('.chatMainItem');
+            [].slice.call(chatList).forEach(function(el,i){
+                var dataName=el.getAttribute("data-name")
+                if(dataName==name){
+                    on=true
+                    el.classList.add('active')
+                }else{
+                    el.classList.remove('active')
+                }
+            })
+            if(!on){
+                $('#chatMain').insertAdjacentHTML("beforeEnd",chatObjectTmp.replace(/{{name}}/g,name))    
+            }
+              
+        }
+    })
+    /*关闭私聊*/
+    $('#chatMain').addEventListener('click',function(event){
+        var target=event.target
+        if(target.className=="close"){
+            target.parentNode.parentNode.remove()
+        }
+    })
     </script>
 </body>
 </html>
