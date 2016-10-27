@@ -8,20 +8,26 @@ app.get('/', function(req, res){
     res.sendFile(__dirname + '/index.html');
 });
 app.use(express.static(path.join(__dirname),{maxAge:0}));
-var num=0,user=[]
+var num=0,nameArray=[],userSocket={}
 io.on('connection', function(socket){
     socket.on('login', function (nickName) {
-        num++
-        console.log("有人进来了",num)
-        io.sockets.emit("loginSuccess",num)//向所有人发送在线人数
+        console.log(nickName+"进入了聊天室")
+        nameArray.push(nickName)
+        //socket.nickName=nameArray
+        userSocket[nickName]=socket
+        io.sockets.emit("loginSuccess",nameArray.length)//向所有人发送在线人数
         socket.broadcast.emit("welcome",nickName)//向其他人发送新人名称
-        socket.on('send', function (msg) {
-            socket.broadcast.emit("send1",msg)//向其他人广播消息
+        socket.on('send', function (user) {
+            if(userSocket[user.toNickName]){
+                userSocket[user.toNickName].emit("send1",user)
+            }
+            //socket.broadcast.emit("send1",user)//向其他人广播消息
         });
         socket.on('disconnect',function(){
-            num--
-            console.log("有人退出了",num)
-            io.sockets.emit("loginOut",num)
+            var index=nameArray.indexOf(nickName)
+            nameArray.splice(index,1)
+            console.log(nickName+"退出了聊天室")
+            io.sockets.emit("loginOut",nameArray.length,nickName)
         })
     });
     
