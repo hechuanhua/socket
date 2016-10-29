@@ -1,7 +1,7 @@
 {
   "name": "scoket",
   "version": "1.0.0",
-  "description": "应用scoket.io的聊天程序",
+  "description": "scoket.io 在线聊天室",
   "main": "index.js",
   "scripts": {
   },
