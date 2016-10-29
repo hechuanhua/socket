@@ -137,66 +137,67 @@ input{outline: none;}
             var _this=this
             $('#chatBox').style.cssText='height:'+(document.documentElement.clientHeight-50)+'px'
             /*设置名称*/
-            $('#enterName').addEventListener('click',function(){
-                nickName=$('#nickName').value.trim()
-                if(!nickName)return
-                socket.emit('login',nickName)
-                $('#setName').remove()
-            })
+            $('#enterName').addEventListener('click',_this.setNickName)
             /*欢迎消息*/
             socket.on("welcome",function(name){
-                console.log("welcome",name,this)
-                _this.box.insertAdjacentHTML("beforeEnd",'<div class="welcome">欢迎'+name+'进入聊天室</div>')
-                _this.box.scrollTop=99999999
+                _this.welcome(name)
             })
             /*有人登录进来*/
             socket.on("loginSuccess",function(nameArray,name){
-                console.log("loginSuccess",nameArray)
-                var num=nameArray.length,tmp="";
-                
-                $('#num').innerHTML=num;
-                if(nickName==name){
-                    [].slice.call($('#onLineList').children).forEach(function(el,i){
-                        el.remove()    
-                    })
-                    for(var i=0;i<num;i++){
-                        tmp+=lineTmp.replace(/{{name}}/g,nameArray[i])
-                    }
-                }else{
-                    tmp=lineTmp.replace(/{{name}}/g,name)
-                }
-                $('#onLineList').insertAdjacentHTML("beforeEnd",tmp)
+                _this.loginSuccess(nameArray,name)
             })
             /*有人退出了*/
-            socket.on('loginOut', function (nameArray,name,index) {
-                //var index=nameArray.indexOf(name)
-                // nameArray.splice(index,1)
-                console.log("loginOut",nameArray,name)
-                $('#num').innerHTML=nameArray.length
-                $('#onLineList').children[index].remove()
-                _this.box.insertAdjacentHTML("beforeEnd",'<div class="welcome">'+name+'已经退出了聊天室</div>')
+            socket.on('loginOut', function(nameArray,name,index){
+                _this.loginOut(nameArray,name,index)
             })
             /*发布聊天内容*/
             $('#send').addEventListener('click',_this.sendChat);
-            window.addEventListener('keyup',function(event){
+            $('#text').addEventListener('keyup',function(event){
                 if(event.keyCode==13){
-                    if(document.activeElement.id="text"){
-                        _this.sendChat()   
-                    }
+                    _this.sendChat()   
                 }
             })
             /*接受聊天内容*/
-            socket.on('send1', function (user) {
-                _this.takeChat(user)      
+            socket.on('send1',function(user){
+                _this.takeChat(user)
             })
             /*私聊*/   
-            $('#onLineList').addEventListener('dblclick',function(event){
-                _this.PM(event)   
-            })
+            $('#onLineList').addEventListener('dblclick',_this.PM.bind(event))
             /*关闭私聊*/
-            $('#chatMain').addEventListener('click',function(event){
-                _this.closePM(event)    
-            })
+            $('#chatMain').addEventListener('click',_this.closePM.bind(event))
+        },
+        setNickName:function(){
+            nickName=$('#nickName').value.trim()
+            if(!nickName)return
+            socket.emit('login',nickName)
+            $('#setName').remove()
+        },
+        loginSuccess:function(nameArray,name){
+            console.log("loginSuccess",nameArray)
+            var num=nameArray.length,tmp="";
+            $('#num').innerHTML=num;
+            if(nickName==name){
+                [].slice.call($('#onLineList').children).forEach(function(el,i){
+                    el.remove()    
+                })
+                for(var i=0;i<num;i++){
+                    tmp+=lineTmp.replace(/{{name}}/g,nameArray[i])
+                }
+            }else{
+                tmp=lineTmp.replace(/{{name}}/g,name)
+            }
+            $('#onLineList').insertAdjacentHTML("beforeEnd",tmp)
+        },
+        loginOut:function (nameArray,name,index) {
+            console.log("loginOut",nameArray,name)
+            $('#num').innerHTML=nameArray.length
+            $('#onLineList').children[index].remove()
+            _this.box.insertAdjacentHTML("beforeEnd",'<div class="welcome">'+name+'已经退出了聊天室</div>')
+        },
+        welcome:function(name){
+            console.log("welcome",name,this)
+            _this.box.insertAdjacentHTML("beforeEnd",'<div class="welcome">欢迎'+name+'进入聊天室</div>')
+            _this.box.scrollTop=99999999
         },
         sendChat:function(){
             value=$('#text').value.trim()
