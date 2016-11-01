@@ -34,7 +34,7 @@ io.on('connection', function(socket){
     
 
 
-    socket.on('connect', function (msg) {
+    /*socket.on('connect', function (msg) {
         console.log("连接成功")
     });
     socket.on('connecting', function (msg) {
@@ -54,7 +54,7 @@ io.on('connection', function(socket){
     });
     socket.on('reconnecting', function (msg) {
         console.log("正在重连")
-    });
+    });*/
 });
 
 http.listen(3000, function(){
