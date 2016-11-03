@@ -7,6 +7,7 @@ var path=require('path')
 app.get('/', function(req, res){
     res.sendFile(__dirname + '/index.html');
 });
+
 app.use(express.static(path.join(__dirname),{maxAge:0}));
 var num=0,nameArray=[],userSocket={}
 io.on('connection', function(socket){
