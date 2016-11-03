@@ -32,9 +32,6 @@ io.on('connection', function(socket){
             io.sockets.emit("loginOut",nameArray,nickName,index)
         })
     });
-    
-
-
     /*socket.on('connect', function (msg) {
         console.log("连接成功")
     });
